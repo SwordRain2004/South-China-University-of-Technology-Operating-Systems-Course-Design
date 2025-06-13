@@ -1,0 +1,102 @@
+help
+
+// --------------------测试系统权限可读不可删改和复制--------------------
+cat system
+rm system  // 错误：该系统文件不可更改。
+cp system SYSTEM  // 错误：该系统文件不可更改。
+
+// --------------------测试mkdir和cd和ls--------------------
+// 相对路径与绝对路径创建目录
+info
+mkdir a
+ls
+mkdir /a/b
+ls
+mkdir /c/d
+ls
+cd a
+ls
+cd /c
+ls
+cd /
+info
+
+// --------------------测试create和rm--------------------
+// 相对路径创建与删除文件
+create a.txt 267  // 错误：请求的文件大小超出了系统最大文件尺寸限制。
+create a.txt 266  // 成功创建文件：a.txt，占用 266 个 block。
+create a.txt 20  //  错误：文件 'a.txt' 已存在。
+ls
+rm a.txt  // 成功删除文件 a.txt
+ls
+
+// 绝对路径创建与删除文件
+create /c/a/b.txt 40  // 错误：未找到目录 a
+create /a/b/c.txt 40  // 成功创建文件：c.txt，占用 40 个 block。
+create /a/b/c.txt 40  // 错误：文件 'c.txt' 已存在。
+cd /a/b
+ls
+cd /
+rm /a/b/cc.txt  // 错误：没有找到该文件。
+rm /a/b/c.txt  // 成功删除文件 c.txt
+cd /a/b
+ls
+cd /
+
+// --------------------测试copy和cat--------------------
+// 测试相对路径+相对路径复制
+create a.txt 12  // 成功创建文件：a.txt，占用 12 个 block。
+create b.txt 12  // 成功创建文件：b.txt，占用 12 个 block。
+ls
+cp a.txt b.txt  // 错误：目标路径已有同名文件。
+cp aa.txt c.txt  // 错误：没有找到该文件。
+cp a.txt c.txt  // 复制成功：a.txt -> c.txt
+cat a.txt
+cat c.txt
+cat b.txt
+// 结果是a.txt和c.txt内容一致
+rm a.txt  // 成功删除文件 a.txt
+rm b.txt  // 成功删除文件 b.txt
+cat c.txt  // 内容正确
+rm c.txt  // 成功删除文件 c.txt
+cat c.txt  // 错误：没有找到该文件
+
+// 测试绝对路径+绝对路径复制
+create /a/a.txt 12  // 成功创建文件：a.txt，占用 12 个 block。
+create /c/b.txt 12  // 成功创建文件：b.txt，占用 12 个 block。
+ls
+cp /a/a.txt /c/b.txt  // 错误：目标路径已有同名文件。
+cp /a/aa.txt /c/c.txt  // 错误：没有找到该文件。
+cp /a/a.txt /c/c.txt  // 复制成功：a.txt -> c.txt
+cat /a/a.txt  // 正常打印
+cat /c/c.txt  // 正常打印
+cat /c/b.txt  // 正常打印
+rm /a/a.txt  // 成功删除文件 a.txt
+rm /c/b.txt  // 成功删除文件 b.txt
+rm /c/c.txt  // 成功删除文件 c.txt
+
+
+// 写入内容并关闭程序
+create /a/a.txt 12
+exit
+
+// 再次打开，检查是否能够正确读取
+ls
+cd a
+ls
+cd /
+// --------------------测试rmdir--------------------
+rmdir /c/d
+cd c
+ls
+cd /
+rmdir c
+ls
+rmdir a
+rmdir a  // [Directory Open Error] Directory 'a' not found in parent!
+
+// --------------------测试完毕--------------------
+exit
+
+
+
